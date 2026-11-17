@@ -19,7 +19,7 @@
             android:value="true" />
         <meta-data
             android:name="xposeddescription"
-            android:value="Titan 2 Elite 三合一状态栏：时间、信号和电池圆环，支持状态栏、通知控制中心和锁屏。" />
+            android:value="DuoStatusBar（Titan 2 Elite）：时间、信号和电池圆环，支持状态栏、通知控制中心和锁屏。" />
         <meta-data
             android:name="xposedminversion"
             android:value="93" />

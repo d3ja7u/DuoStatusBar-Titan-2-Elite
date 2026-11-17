@@ -1,6 +1,6 @@
-# 三合一状态栏（Titan 2 Elite）
+# DuoStatusBar（Titan 2 Elite）
 
-一个精简的 LSPosed 模块：把时间、当前网络信号和电池圆环合成一个右侧指示器，并将原左侧时钟合并到右侧。参考 Duo Status Bar 的电池圆环思路，针对本机 Android 16 / MtkSystemUI 的三套布局实现。
+一个精简的 LSPosed 模块：把时间、当前网络信号和电池圆环合成一个右侧指示器，并将原左侧时钟合并到右侧。参考 iPhone Duo 的电池圆环思路，针对本机 Android 16 / MtkSystemUI 的三套布局实现。
 
 ## 功能
 
@@ -33,13 +33,10 @@ APK 输出：`app/build/outputs/apk/debug/app-debug.apk`。
 ## 安装与启用
 
 1. 安装 APK。
-2. 在 LSPosed 中启用“三合一状态栏”，作用域只选择 SystemUI。
-3. 如果装有原版 Duo Status Bar，先暂时停用原版，避免冲突。
-4. 重启 SystemUI。
-5. 打开“三合一状态栏”App，选择需要修改的位置。
+2. 在 LSPosed 中启用“DuoStatusBar”，作用域只选择 SystemUI。
+3. 重启 SystemUI。
+4. 打开“DuoStatusBar”App，选择需要修改的位置。
 
 当前稳定版本：`1.3.5`（`versionCode 12`）。已在 Titan 2 Elite（Android 16 / MtkSystemUI）真机验证锁屏、通知与控制中心、普通状态栏三个场景及图标隐藏开关。普通状态栏与锁屏通过扩展图标行高度容纳 28dp 圆环；通知与控制中心因 header 由 MotionLayout 驱动、扩高会被重测覆盖，改为按可用高度自适应缩小圆环。
 
-## 来源
 
-设计参考：Duo Status Bar，Copyright © 2024-2026 kvmy666，GPL-3.0。详见 `NOTICE.md` 与 `LICENSE`。
