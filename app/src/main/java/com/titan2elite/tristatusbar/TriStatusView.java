@@ -283,15 +283,14 @@ public final class TriStatusView extends LinearLayout {
             float startX = (w - totalW) / 2f;
             float radius = barW * 0.45f;
             if (level2 >= 0) {
-                // Dual SIM: two compact bar groups plus one shared label.
-                float[] heights = {3.2f, 3.8f, 4.3f, 4.8f};
-                drawBars(canvas, density, level, startX, pitch, barW, radius, heights,
-                        density * 5.5f);
-                drawBars(canvas, density, level2, startX, pitch, barW, radius, heights,
-                        density * 12.5f);
+                // Dual SIM: 8 dots (2 rows x 4), centred, with one shared label.
+                float dotRadius = density * 1.2f;
+                float spacingX = w / 4f;
+                drawDotsRow(canvas, level, spacingX, density * 5.5f, dotRadius);
+                drawDotsRow(canvas, level2, spacingX, density * 9.5f, dotRadius);
                 textPaint.setColor(color);
-                textPaint.setTextSize(density * 6f);
-                canvas.drawText(label, w / 2f, density * 19.5f, textPaint);
+                textPaint.setTextSize(density * 5.5f);
+                canvas.drawText(label, w / 2f, density * 17f, textPaint);
             } else {
                 float[] heights = {5.0f, 5.8f, 6.5f, 7.2f};
                 drawBars(canvas, density, level, startX, pitch, barW, radius, heights,
@@ -312,6 +311,16 @@ public final class TriStatusView extends LinearLayout {
                 float x = startX + i * pitch;
                 barRect.set(x, baseY - bh, x + barW, baseY);
                 canvas.drawRoundRect(barRect, radius, radius, barPaint);
+            }
+        }
+
+        private void drawDotsRow(Canvas canvas, int lvl, float spacingX, float centerY,
+                float radius) {
+            for (int i = 0; i < 4; i++) {
+                boolean on = i < lvl;
+                barPaint.setColor(on ? color : Color.argb(66,
+                        Color.red(color), Color.green(color), Color.blue(color)));
+                canvas.drawCircle(spacingX * (i + 0.5f), centerY, radius, barPaint);
             }
         }
     }
