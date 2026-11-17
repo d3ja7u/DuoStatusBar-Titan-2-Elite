@@ -37,6 +37,6 @@ APK 输出：`app/build/outputs/apk/debug/app-debug.apk`。
 3. 重启 SystemUI。
 4. 打开“DuoStatusBar”App，选择需要修改的位置。
 
-当前稳定版本：`1.3.5`（`versionCode 12`）。已在 Titan 2 Elite（Android 16 / MtkSystemUI）真机验证锁屏、通知与控制中心、普通状态栏三个场景及图标隐藏开关。普通状态栏与锁屏通过扩展图标行高度容纳 28dp 圆环；通知与控制中心因 header 由 MotionLayout 驱动、扩高会被重测覆盖，改为按可用高度自适应缩小圆环。
+当前稳定版本：`1.3.10`（`versionCode 17`）。已在 Titan 2 Elite（Android 16 / MtkSystemUI）真机验证锁屏、通知与控制中心、普通状态栏三个场景及图标隐藏开关。普通状态栏与锁屏通过扩展图标行高度容纳 28dp 圆环；通知与控制中心因 header 由 MotionLayout 驱动、扩高会被重测覆盖，改为按可用高度自适应缩小圆环。
 
 

@@ -14,5 +14,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "TriStatusBar"
+rootProject.name = "DuoStatusBar (Titan 2 Elite)"
 include ':app'
