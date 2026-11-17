@@ -149,7 +149,7 @@ public final class TriStatusView extends LinearLayout {
             signalView.setVisibility(copy != null ? VISIBLE : GONE);
             signalView.setImageDrawable(copy);
             signalView.setImageTintList(ColorStateList.valueOf(color));
-            signalView.setTranslationY(showBatteryPercent ? dp(compact ? 2 : 2) : 0);
+            signalView.setTranslationY(showBatteryPercent ? dp(-3) : 0);
             cellularView.setVisibility(GONE);
         } else {
             signalView.setVisibility(GONE);

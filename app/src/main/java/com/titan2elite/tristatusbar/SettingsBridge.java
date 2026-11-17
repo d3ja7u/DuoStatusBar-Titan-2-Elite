@@ -18,6 +18,9 @@ final class SettingsBridge {
         void onSettingsChanged();
     }
 
+    /** How long to wait before retrying a failed provider read. */
+    private static final int RETRY_INTERVAL_MS = 3000;
+
     private static SettingsBridge instance;
 
     static synchronized SettingsBridge get(Context context) {
@@ -37,6 +40,17 @@ final class SettingsBridge {
     private boolean hideOther;
     private boolean showBatteryPercent;
     private boolean largeClock;
+    private boolean loaded;
+
+    private final Runnable retryRunnable = new Runnable() {
+        @Override
+        public void run() {
+            reload();
+            if (loaded) {
+                dispatch();
+            }
+        }
+    };
 
     private SettingsBridge(Context context) {
         resolver = context.getContentResolver();
@@ -98,10 +112,24 @@ final class SettingsBridge {
                         SettingsContract.KEY_SHOW_BATTERY_PERCENT, false);
                 largeClock = result.getBoolean(
                         SettingsContract.KEY_LARGE_CLOCK, false);
+                loaded = true;
+                handler.removeCallbacks(retryRunnable);
+            } else {
+                scheduleRetry();
             }
         } catch (Throwable ignored) {
-            // Keep previous values if the provider call fails.
+            // The provider is not available yet (e.g. direct-boot before the user unlocks);
+            // retry a little later instead of silently keeping the defaults forever.
+            scheduleRetry();
         }
+    }
+
+    private void scheduleRetry() {
+        if (loaded) {
+            return;
+        }
+        handler.removeCallbacks(retryRunnable);
+        handler.postDelayed(retryRunnable, RETRY_INTERVAL_MS);
     }
 
     private void dispatch() {
