@@ -39,8 +39,9 @@ public final class MainActivity extends Activity {
         preview.setBackgroundColor(Color.rgb(31, 33, 38));
         preview.setPadding(dp(20), dp(18), dp(20), dp(18));
         TriStatusView indicator = new TriStatusView(this);
+        indicator.setLargeClock(prefs.getBoolean(SettingsContract.KEY_LARGE_CLOCK, false));
         indicator.render("09:34", Color.WHITE, getDrawable(R.drawable.ic_wifi), true, 78, true,
-                prefs.getBoolean(SettingsContract.KEY_SHOW_BATTERY_PERCENT, false), 4, null);
+                prefs.getBoolean(SettingsContract.KEY_SHOW_BATTERY_PERCENT, false), 4, -1, null);
         FrameLayout.LayoutParams indicatorParams = new FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT);
         indicatorParams.gravity = Gravity.CENTER;
@@ -60,6 +61,8 @@ public final class MainActivity extends Activity {
         content.addView(displayLabel);
         addSwitch(content, SettingsContract.KEY_SHOW_BATTERY_PERCENT, false,
                 "圆环内显示电量数字", "数字显示在圆环内上方，保留中央信号图标");
+        addSwitch(content, SettingsContract.KEY_LARGE_CLOCK, false,
+                "时间字体加大", "时间数字放大到与电池圆环一致");
 
         TextView iconLabel = text("隐藏状态图标", 14, Color.rgb(142, 190, 255));
         iconLabel.setPadding(0, dp(24), 0, dp(6));

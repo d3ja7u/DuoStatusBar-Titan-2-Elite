@@ -25,6 +25,7 @@ public final class TriStatusView extends LinearLayout {
     private final RingView ringView;
     private boolean vertical;
     private int ringSizePx = -1;
+    private boolean largeClock;
 
     public TriStatusView(Context context) {
         super(context);
@@ -102,12 +103,11 @@ public final class TriStatusView extends LinearLayout {
                 LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
         if (vertical) {
             clockParams.bottomMargin = dp(3);
-            clockView.setTextSize(13);
         } else {
             clockParams.rightMargin = dp(6);
-            clockView.setTextSize(14);
         }
         clockView.setLayoutParams(clockParams);
+        applyClockSize();
 
         int ringSize = ringSizePx > 0 ? ringSizePx : dp(vertical ? 27 : 28);
         LayoutParams ringParams = new LayoutParams(ringSize, ringSize);
@@ -124,14 +124,27 @@ public final class TriStatusView extends LinearLayout {
         requestLayout();
     }
 
+    void setLargeClock(boolean large) {
+        if (this.largeClock == large) {
+            return;
+        }
+        this.largeClock = large;
+        applyClockSize();
+    }
+
+    private void applyClockSize() {
+        clockView.setTextSize(largeClock ? 28 : (vertical ? 13 : 14));
+    }
+
     public void render(String time, int color, Drawable signal, boolean wifi,
             int batteryLevel, boolean charging, boolean showBatteryPercent, int mobileLevel,
-            String netLabel) {
+            int mobileLevel2, String netLabel) {
         clockView.setText(time);
         clockView.setTextColor(color);
 
         Drawable copy = copyDrawable(signal);
         boolean compact = ringSizePx > 0 && ringSizePx < dp(24);
+        boolean dual = mobileLevel2 >= 0;
         if (wifi) {
             signalView.setVisibility(copy != null ? VISIBLE : GONE);
             signalView.setImageDrawable(copy);
@@ -140,18 +153,30 @@ public final class TriStatusView extends LinearLayout {
             cellularView.setVisibility(GONE);
         } else {
             signalView.setVisibility(GONE);
-            cellularView.setState(mobileLevel, netLabel, color);
+            cellularView.setState(mobileLevel, mobileLevel2, netLabel, color);
             // Keep the bars+label unit centred inside the ring; the battery
             // number lives in the top gap, the bars sit on the vertical centre.
             cellularView.setTranslationY(showBatteryPercent ? dp(compact ? 2 : 2) : 0);
             cellularView.setVisibility(VISIBLE);
+            FrameLayout.LayoutParams cellLp = (FrameLayout.LayoutParams) cellularView.getLayoutParams();
+            int cellHeight = dual ? dp(22) : dp(18);
+            if (cellLp.height != cellHeight) {
+                cellLp.height = cellHeight;
+                cellularView.setLayoutParams(cellLp);
+            }
         }
         batteryView.setText(String.valueOf(Math.max(0, Math.min(100, batteryLevel))));
         batteryView.setTextColor(color);
         batteryView.setTextSize(compact ? 8 : 10);
         batteryView.setTranslationY(showBatteryPercent ? -dp(compact ? 5 : 10) : 0);
         batteryView.setVisibility(showBatteryPercent ? VISIBLE : GONE);
-        dotsView.setState(mobileLevel, color);
+        dotsView.setState(mobileLevel, mobileLevel2, color);
+        FrameLayout.LayoutParams dotsLp = (FrameLayout.LayoutParams) dotsView.getLayoutParams();
+        int dotsHeight = dual ? dp(8) : dp(4);
+        if (dotsLp.height != dotsHeight) {
+            dotsLp.height = dotsHeight;
+            dotsView.setLayoutParams(dotsLp);
+        }
         dotsView.setVisibility(showBatteryPercent && wifi ? VISIBLE : GONE);
         ringView.setState(batteryLevel, color, charging, showBatteryPercent);
 
@@ -175,14 +200,16 @@ public final class TriStatusView extends LinearLayout {
     private static final class CellDotsView extends View {
         private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
         private int level;
+        private int level2 = -1;
         private int color = Color.WHITE;
 
         CellDotsView(Context context) {
             super(context);
         }
 
-        void setState(int level, int color) {
+        void setState(int level, int level2, int color) {
             this.level = Math.max(0, Math.min(4, level));
+            this.level2 = level2 < 0 ? -1 : Math.max(0, Math.min(4, level2));
             this.color = color;
             invalidate();
         }
@@ -191,13 +218,20 @@ public final class TriStatusView extends LinearLayout {
         protected void onDraw(Canvas canvas) {
             super.onDraw(canvas);
             float density = getResources().getDisplayMetrics().density;
-            float radius = density * 1.1f;
+            float radius = density * 1.0f;
             float spacing = getWidth() / 4f;
-            float centerY = getHeight() / 2f;
-            for (int i = 0; i < 4; i++) {
-                paint.setColor(i < level ? color : Color.argb(65,
-                        Color.red(color), Color.green(color), Color.blue(color)));
-                canvas.drawCircle(spacing * (i + 0.5f), centerY, radius, paint);
+            boolean dual = level2 >= 0;
+            int rows = dual ? 2 : 1;
+            for (int r = 0; r < rows; r++) {
+                int lvl = r == 0 ? level : level2;
+                float centerY = dual
+                        ? (r == 0 ? getHeight() * 0.28f : getHeight() * 0.72f)
+                        : getHeight() / 2f;
+                for (int i = 0; i < 4; i++) {
+                    paint.setColor(i < lvl ? color : Color.argb(65,
+                            Color.red(color), Color.green(color), Color.blue(color)));
+                    canvas.drawCircle(spacing * (i + 0.5f), centerY, radius, paint);
+                }
             }
         }
     }
@@ -214,6 +248,7 @@ public final class TriStatusView extends LinearLayout {
         private final Paint textPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         private final RectF barRect = new RectF();
         private int level;
+        private int level2 = -1;
         private String label = "5G";
         private int color = Color.WHITE;
 
@@ -224,8 +259,9 @@ public final class TriStatusView extends LinearLayout {
                     "sans-serif-medium", android.graphics.Typeface.BOLD));
         }
 
-        void setState(int level, String label, int color) {
+        void setState(int level, int level2, String label, int color) {
             this.level = Math.max(0, Math.min(4, level));
+            this.level2 = level2 < 0 ? -1 : Math.max(0, Math.min(4, level2));
             this.label = label == null || label.isEmpty() ? "5G" : label;
             this.color = color;
             invalidate();
@@ -245,11 +281,31 @@ public final class TriStatusView extends LinearLayout {
             float pitch = barW + gap;
             float totalW = barW * 4f + gap * 3f;
             float startX = (w - totalW) / 2f;
-            float baseY = density * 8.5f;
-            float[] heights = {5.0f, 5.8f, 6.5f, 7.2f};
             float radius = barW * 0.45f;
+            if (level2 >= 0) {
+                // Dual SIM: two compact bar groups plus one shared label.
+                float[] heights = {3.2f, 3.8f, 4.3f, 4.8f};
+                drawBars(canvas, density, level, startX, pitch, barW, radius, heights,
+                        density * 5.5f);
+                drawBars(canvas, density, level2, startX, pitch, barW, radius, heights,
+                        density * 12.5f);
+                textPaint.setColor(color);
+                textPaint.setTextSize(density * 6f);
+                canvas.drawText(label, w / 2f, density * 19.5f, textPaint);
+            } else {
+                float[] heights = {5.0f, 5.8f, 6.5f, 7.2f};
+                drawBars(canvas, density, level, startX, pitch, barW, radius, heights,
+                        density * 8.5f);
+                textPaint.setColor(color);
+                textPaint.setTextSize(density * 7f);
+                canvas.drawText(label, w / 2f, density * 16.5f, textPaint);
+            }
+        }
+
+        private void drawBars(Canvas canvas, float density, int lvl, float startX,
+                float pitch, float barW, float radius, float[] heights, float baseY) {
             for (int i = 0; i < 4; i++) {
-                boolean on = i < level;
+                boolean on = i < lvl;
                 barPaint.setColor(on ? color : Color.argb(66,
                         Color.red(color), Color.green(color), Color.blue(color)));
                 float bh = density * heights[i];
@@ -257,9 +313,6 @@ public final class TriStatusView extends LinearLayout {
                 barRect.set(x, baseY - bh, x + barW, baseY);
                 canvas.drawRoundRect(barRect, radius, radius, barPaint);
             }
-            textPaint.setColor(color);
-            textPaint.setTextSize(density * 7f);
-            canvas.drawText(label, w / 2f, density * 16.5f, textPaint);
         }
     }
 

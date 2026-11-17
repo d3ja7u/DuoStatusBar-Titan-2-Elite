@@ -42,6 +42,8 @@ public final class SettingsProvider extends ContentProvider {
                 prefs.getBoolean(SettingsContract.KEY_HIDE_OTHER, false));
         result.putBoolean(SettingsContract.KEY_SHOW_BATTERY_PERCENT,
                 prefs.getBoolean(SettingsContract.KEY_SHOW_BATTERY_PERCENT, false));
+        result.putBoolean(SettingsContract.KEY_LARGE_CLOCK,
+                prefs.getBoolean(SettingsContract.KEY_LARGE_CLOCK, false));
         return result;
     }
 

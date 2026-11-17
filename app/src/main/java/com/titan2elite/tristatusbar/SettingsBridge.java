@@ -36,6 +36,7 @@ final class SettingsBridge {
     private boolean hideRinger;
     private boolean hideOther;
     private boolean showBatteryPercent;
+    private boolean largeClock;
 
     private SettingsBridge(Context context) {
         resolver = context.getContentResolver();
@@ -74,6 +75,10 @@ final class SettingsBridge {
         return showBatteryPercent;
     }
 
+    boolean shouldUseLargeClock() {
+        return largeClock;
+    }
+
     void addListener(Listener listener) {
         listeners.add(new WeakReference<>(listener));
     }
@@ -91,6 +96,8 @@ final class SettingsBridge {
                 hideOther = result.getBoolean(SettingsContract.KEY_HIDE_OTHER, false);
                 showBatteryPercent = result.getBoolean(
                         SettingsContract.KEY_SHOW_BATTERY_PERCENT, false);
+                largeClock = result.getBoolean(
+                        SettingsContract.KEY_LARGE_CLOCK, false);
                 android.util.Log.d("DuoStatusBarBridge", "reload pid=" + android.os.Process.myPid());
             } else {
                 android.util.Log.d("DuoStatusBarBridge", "reload pid="

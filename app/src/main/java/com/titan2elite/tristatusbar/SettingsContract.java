@@ -12,6 +12,7 @@ final class SettingsContract {
     static final String KEY_HIDE_RINGER = "hide_ringer";
     static final String KEY_HIDE_OTHER = "hide_other";
     static final String KEY_SHOW_BATTERY_PERCENT = "show_battery_percent";
+    static final String KEY_LARGE_CLOCK = "large_clock";
 
     private SettingsContract() {
     }

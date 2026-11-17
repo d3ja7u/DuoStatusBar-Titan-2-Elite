@@ -175,7 +175,8 @@ final class SceneController implements SettingsBridge.Listener {
         applyOptionalIconVisibility(section);
 
         ImageView wifi = findImageByName(section, "wifi_signal");
-        ImageView mobile = findImageByName(section, "mobile_signal");
+        List<ImageView> mobiles = findAllImagesByName(section, "mobile_signal");
+        ImageView mobile = mobiles.isEmpty() ? null : mobiles.get(0);
         boolean wifiConnected = isWifiConnected(root.getContext());
         boolean useWifi = wifiConnected && wifi != null;
         if (!useWifi && mobile == null && wifi != null) {
@@ -192,10 +193,13 @@ final class SceneController implements SettingsBridge.Listener {
 
         BatteryState battery = readBattery(section);
         indicator.setVerticalMode(isVertical(target));
+        indicator.setLargeClock(settings.shouldUseLargeClock());
         String netLabel = useWifi ? null : NetworkLabelResolver.label(root.getContext());
+        int mobileLevel = mobiles.isEmpty() ? 0 : readMobileLevel(mobiles.get(0));
+        int mobileLevel2 = mobiles.size() > 1 ? readMobileLevel(mobiles.get(1)) : -1;
         indicator.render(time, color, selected == null ? null : selected.getDrawable(),
                 useWifi, battery.level, battery.charging, settings.shouldShowBatteryPercent(),
-                readMobileLevel(mobile), netLabel);
+                mobileLevel, mobileLevel2, netLabel);
     }
 
     private int readMobileLevel(ImageView mobile) {
@@ -605,6 +609,18 @@ final class SceneController implements SettingsBridge.Listener {
             }
         }
         return fallback;
+    }
+
+    private List<ImageView> findAllImagesByName(View root, String name) {
+        List<View> views = new ArrayList<>();
+        collectByName(root, name, views);
+        List<ImageView> images = new ArrayList<>();
+        for (View view : views) {
+            if (view instanceof ImageView) {
+                images.add((ImageView) view);
+            }
+        }
+        return images;
     }
 
     private void collectByName(View view, String name, List<View> output) {
