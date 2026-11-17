@@ -10,7 +10,7 @@ import android.util.Log;
 
 /** Read-only bridge used by SystemUI; it exposes only non-sensitive display booleans. */
 public final class SettingsProvider extends ContentProvider {
-    private static final String TAG = "TriStatusBarProvider";
+    private static final String TAG = "DuoStatusBarProvider";
 
     @Override
     public boolean onCreate() {

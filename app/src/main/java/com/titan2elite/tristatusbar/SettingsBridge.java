@@ -91,13 +91,13 @@ final class SettingsBridge {
                 hideOther = result.getBoolean(SettingsContract.KEY_HIDE_OTHER, false);
                 showBatteryPercent = result.getBoolean(
                         SettingsContract.KEY_SHOW_BATTERY_PERCENT, false);
-                android.util.Log.d("TriStatusBarBridge", "reload pid=" + android.os.Process.myPid());
+                android.util.Log.d("DuoStatusBarBridge", "reload pid=" + android.os.Process.myPid());
             } else {
-                android.util.Log.d("TriStatusBarBridge", "reload pid="
+                android.util.Log.d("DuoStatusBarBridge", "reload pid="
                         + android.os.Process.myPid() + " result=null");
             }
         } catch (Throwable t) {
-            android.util.Log.d("TriStatusBarBridge", "reload pid="
+            android.util.Log.d("DuoStatusBarBridge", "reload pid="
                     + android.os.Process.myPid() + " failed: " + t);
         }
     }

@@ -12,7 +12,7 @@
         android:allowBackup="false"
         android:icon="@drawable/ic_module"
         android:label="@string/app_name"
-        android:theme="@style/Theme.TriStatusBar">
+        android:theme="@style/Theme.DuoStatusBar">
 
         <meta-data
             android:name="xposedmodule"

@@ -16,7 +16,7 @@ import de.robv.android.xposed.XposedHelpers;
 import de.robv.android.xposed.callbacks.XC_LoadPackage;
 
 public final class XposedEntry implements IXposedHookLoadPackage {
-    private static final String TAG = "TriStatusBar: ";
+    private static final String TAG = "DuoStatusBar: ";
     private static final Map<View, SceneController> CONTROLLERS =
             Collections.synchronizedMap(new WeakHashMap<>());
     private static final Map<View, LockClockController> LOCK_CLOCKS =

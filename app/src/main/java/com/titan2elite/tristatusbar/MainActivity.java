@@ -28,7 +28,7 @@ public final class MainActivity extends Activity {
         content.setPadding(dp(24), dp(28), dp(24), dp(36));
         scrollView.addView(content);
 
-        TextView title = text("三合一状态栏", 28, Color.WHITE);
+        TextView title = text("DuoStatusBar", 28, Color.WHITE);
         title.setTypeface(android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.BOLD));
         content.addView(title);
         TextView subtitle = text("Titan 2 Elite · LSPosed", 14, Color.rgb(155, 160, 170));
