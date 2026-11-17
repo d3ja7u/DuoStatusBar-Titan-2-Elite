@@ -286,11 +286,11 @@ public final class TriStatusView extends LinearLayout {
                 // Dual SIM: 8 dots (2 rows x 4), centred, with one shared label.
                 float dotRadius = density * 1.2f;
                 float spacingX = w / 4f;
-                drawDotsRow(canvas, level, spacingX, density * 5.5f, dotRadius);
-                drawDotsRow(canvas, level2, spacingX, density * 9.5f, dotRadius);
+                drawDotsRow(canvas, level, spacingX, density * 8f, dotRadius);
+                drawDotsRow(canvas, level2, spacingX, density * 12f, dotRadius);
                 textPaint.setColor(color);
-                textPaint.setTextSize(density * 5.5f);
-                canvas.drawText(label, w / 2f, density * 17f, textPaint);
+                textPaint.setTextSize(density * 6.5f);
+                canvas.drawText(label, w / 2f, density * 20f, textPaint);
             } else {
                 float[] heights = {5.0f, 5.8f, 6.5f, 7.2f};
                 drawBars(canvas, density, level, startX, pitch, barW, radius, heights,

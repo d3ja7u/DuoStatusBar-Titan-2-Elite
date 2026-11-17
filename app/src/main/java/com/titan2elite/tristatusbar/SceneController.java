@@ -11,7 +11,10 @@ import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
 import android.text.format.DateFormat;
+import android.telephony.CellSignalStrength;
 import android.telephony.SignalStrength;
+import android.telephony.SubscriptionInfo;
+import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.view.Gravity;
 import android.view.View;
@@ -169,8 +172,14 @@ final class SceneController implements SettingsBridge.Listener {
         if (scene != Scene.LOCK) {
             suppressAll(section, "clock");
         }
+        // The operator-name (carrier) label is rendered by the split-shade and lock layouts
+        // as well; keep it suppressed in every scene so the combined indicator stays clean.
+        suppressAll(section, "operator_name");
         if (scene == Scene.SHADE) {
             suppressAll(section, "carrier_group");
+        }
+        if (scene == Scene.LOCK) {
+            suppressKeyguardCarrier();
         }
         applyOptionalIconVisibility(section);
 
@@ -195,31 +204,63 @@ final class SceneController implements SettingsBridge.Listener {
         indicator.setVerticalMode(isVertical(target));
         indicator.setLargeClock(settings.shouldUseLargeClock());
         String netLabel = useWifi ? null : NetworkLabelResolver.label(root.getContext());
-        int mobileLevel = mobiles.isEmpty() ? 0 : readMobileLevel(mobiles.get(0));
-        int mobileLevel2 = mobiles.size() > 1 ? readMobileLevel(mobiles.get(1)) : -1;
+        List<SubscriptionInfo> subs = getActiveSubscriptions();
+        int activeSims = subs.isEmpty() ? 1 : subs.size();
+        int mobileLevel = subs.isEmpty() ? readSignalLevel(-1)
+                : readSignalLevel(subs.get(0).getSubscriptionId());
+        int mobileLevel2 = activeSims > 1 && subs.size() > 1
+                ? readSignalLevel(subs.get(1).getSubscriptionId()) : -1;
         indicator.render(time, color, selected == null ? null : selected.getDrawable(),
                 useWifi, battery.level, battery.charging, settings.shouldShowBatteryPercent(),
                 mobileLevel, mobileLevel2, netLabel);
     }
 
-    private int readMobileLevel(ImageView mobile) {
-        if (mobile != null && mobile.getDrawable() != null) {
-            int level = mobile.getDrawable().getLevel();
-            if (level > 0) {
-                return Math.min(4, level);
-            }
-        }
+    private int readSignalLevel(int subId) {
         try {
-            TelephonyManager telephony = (TelephonyManager) root.getContext()
+            TelephonyManager base = (TelephonyManager) root.getContext()
                     .getSystemService(Context.TELEPHONY_SERVICE);
-            SignalStrength strength = telephony == null ? null : telephony.getSignalStrength();
-            if (strength != null) {
-                return Math.max(0, Math.min(4, strength.getLevel()));
+            if (base == null) {
+                return 0;
             }
+            TelephonyManager telephony = subId >= 0 ? base.createForSubscriptionId(subId) : base;
+            SignalStrength strength = telephony.getSignalStrength();
+            if (strength == null) {
+                return 0;
+            }
+            int dbm = Integer.MIN_VALUE;
+            for (CellSignalStrength c : strength.getCellSignalStrengths()) {
+                int d = c.getDbm();
+                if (d > -140 && d < 0 && d > dbm) {
+                    dbm = d;
+                }
+            }
+            return dbmToBars(dbm);
         } catch (Throwable ignored) {
-            // SystemUI normally has phone-state access; keep an empty dot row if unavailable.
         }
         return 0;
+    }
+
+    private int dbmToBars(int dbm) {
+        if (dbm == Integer.MIN_VALUE) {
+            return 0;
+        }
+        // 4 格制标准阈值（5G NR / 4G LTE 的 RSRP，单位 dBm）
+        if (dbm >= -103) return 4;
+        if (dbm >= -113) return 3;
+        if (dbm >= -123) return 2;
+        if (dbm >= -133) return 1;
+        return 0;
+    }
+
+    private List<SubscriptionInfo> getActiveSubscriptions() {
+        try {
+            SubscriptionManager sm = (SubscriptionManager) root.getContext()
+                    .getSystemService(Context.TELEPHONY_SUBSCRIPTION_SERVICE);
+            List<SubscriptionInfo> subs = sm == null ? null : sm.getActiveSubscriptionInfoList();
+            return subs == null ? new ArrayList<>() : subs;
+        } catch (Throwable ignored) {
+            return new ArrayList<>();
+        }
     }
 
     private void applyOptionalIconVisibility(View section) {
@@ -245,6 +286,7 @@ final class SceneController implements SettingsBridge.Listener {
                 if ((hideBluetooth && bluetooth) || (hideRinger && ringer)
                         || (hideOther && !signal && !bluetooth && !ringer)) {
                     suppress(child);
+                    guardHidden(child);
                 }
             }
         }
@@ -355,11 +397,13 @@ final class SceneController implements SettingsBridge.Listener {
                     ViewGroup.LayoutParams.WRAP_CONTENT, height,
                     Gravity.END | Gravity.CENTER_VERTICAL);
             frameParams.leftMargin = dp(8);
+            frameParams.rightMargin = dp(6);
             params = frameParams;
         } else {
             LinearLayout.LayoutParams linearParams = new LinearLayout.LayoutParams(
                     ViewGroup.LayoutParams.WRAP_CONTENT, height);
             linearParams.gravity = Gravity.CENTER_VERTICAL;
+            linearParams.rightMargin = dp(20);
             params = linearParams;
         }
         parent.addView(indicator, params);
@@ -440,12 +484,46 @@ final class SceneController implements SettingsBridge.Listener {
         }
     }
 
+    private void suppressKeyguardCarrier() {
+        int carrierId = id("keyguard_carrier_text");
+        if (carrierId == 0) {
+            return;
+        }
+        View carrier = null;
+        View top = root.getRootView();
+        if (top != null) {
+            carrier = top.findViewById(carrierId);
+        }
+        if (carrier == null) {
+            View parent = root;
+            while (parent != null) {
+                carrier = parent.findViewById(carrierId);
+                if (carrier != null) {
+                    break;
+                }
+                if (parent.getParent() instanceof View) {
+                    parent = (View) parent.getParent();
+                } else {
+                    break;
+                }
+            }
+        }
+        if (carrier != null) {
+            suppress(carrier);
+            guardHidden(carrier);
+            if (carrier instanceof TextView) {
+                ((TextView) carrier).setText("");
+            }
+        }
+    }
+
     private void suppressAll(View section, String... names) {
         for (String name : names) {
             List<View> views = new ArrayList<>();
             collectByName(section, name, views);
             for (View view : views) {
                 suppress(view);
+                guardHidden(view);
                 if ("clock".equals(name) && view instanceof TextView) {
                     ((TextView) view).setText("");
                 }
