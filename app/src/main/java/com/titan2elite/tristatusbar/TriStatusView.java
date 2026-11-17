@@ -160,8 +160,10 @@ public final class TriStatusView extends LinearLayout {
             cellularView.setVisibility(VISIBLE);
             FrameLayout.LayoutParams cellLp = (FrameLayout.LayoutParams) cellularView.getLayoutParams();
             int cellHeight = dual ? dp(22) : dp(18);
-            if (cellLp.height != cellHeight) {
+            int cellWidth = dual ? dp(13) : dp(18);
+            if (cellLp.height != cellHeight || cellLp.width != cellWidth) {
                 cellLp.height = cellHeight;
+                cellLp.width = cellWidth;
                 cellularView.setLayoutParams(cellLp);
             }
         }
@@ -173,8 +175,10 @@ public final class TriStatusView extends LinearLayout {
         dotsView.setState(mobileLevel, mobileLevel2, color);
         FrameLayout.LayoutParams dotsLp = (FrameLayout.LayoutParams) dotsView.getLayoutParams();
         int dotsHeight = dual ? dp(8) : dp(4);
-        if (dotsLp.height != dotsHeight) {
+        int dotsWidth = dp(13);
+        if (dotsLp.height != dotsHeight || dotsLp.width != dotsWidth) {
             dotsLp.height = dotsHeight;
+            dotsLp.width = dotsWidth;
             dotsView.setLayoutParams(dotsLp);
         }
         dotsView.setVisibility(showBatteryPercent && wifi ? VISIBLE : GONE);
