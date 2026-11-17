@@ -1,3 +1,5 @@
+English · [中文](README_CN.md)
+
 # DuoStatusBar (Titan 2 Elite)
 
 A lightweight LSPosed module that combines the clock, network signal, and battery ring into a single right-side indicator, and merges the original left clock into the right side. The battery ring design is inspired by the iPhone Duo, adapted for the three layouts of Android 16 / MtkSystemUI on this device.
