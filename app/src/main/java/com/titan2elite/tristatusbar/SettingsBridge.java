@@ -98,14 +98,9 @@ final class SettingsBridge {
                         SettingsContract.KEY_SHOW_BATTERY_PERCENT, false);
                 largeClock = result.getBoolean(
                         SettingsContract.KEY_LARGE_CLOCK, false);
-                android.util.Log.d("DuoStatusBarBridge", "reload pid=" + android.os.Process.myPid());
-            } else {
-                android.util.Log.d("DuoStatusBarBridge", "reload pid="
-                        + android.os.Process.myPid() + " result=null");
             }
-        } catch (Throwable t) {
-            android.util.Log.d("DuoStatusBarBridge", "reload pid="
-                    + android.os.Process.myPid() + " failed: " + t);
+        } catch (Throwable ignored) {
+            // Keep previous values if the provider call fails.
         }
     }
 
